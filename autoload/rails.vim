@@ -3541,21 +3541,44 @@ function! s:AR(cmd,related,line1,line2,count,...) abort
       endtry
     endif
     let confirm = &confirm || (histget(':', -1) =~# '\%(^\||\)\s*conf\%[irm]\>')
-    if confirm && !line && !has_path
-      let projected = rails#buffer().projected_with_raw('alternate')
-      call filter(projected, 'rails#app().has_path(matchstr(v:val[1], "^[^{}]*/"))')
-      if len(projected)
-        let choices = ['Create alternate file?']
-        let i = 0
-        for [alt, _] in projected
-          let i += 1
-          call add(choices, i.' '.alt)
-        endfor
-        let i = inputlist(choices)
-        if i > 0 && i <= len(projected)
-          let file = projected[i-1][0] . '!'
-        else
-          return ''
+    if confirm && !has_path
+      if line
+        let parts = split(file, '/')
+        " Only show choices when related file is view
+        if parts[len(parts) - 1] =~ '^[a-zA-Z_]*$'
+          let choices = ['Create related file?']
+          let file_list = []
+          for ext in ['.json.jbuilder', '.html.slim']
+            call add(file_list, file . ext)
+          endfor
+          let i = 0
+          for alt in file_list
+            let i += 1
+            call add(choices, i.' '.alt)
+          endfor
+          let i = inputlist(choices)
+          if i > 0 && i <= len(file_list)
+            let file = file_list[i-1] . '!'
+          else
+            return ''
+          endif
+        endif
+      else
+        let projected = rails#buffer().projected_with_raw('alternate')
+        call filter(projected, 'rails#app().has_path(matchstr(v:val[1], "^[^{}]*/"))')
+        if len(projected)
+          let choices = ['Create alternate file?']
+          let i = 0
+          for [alt, _] in projected
+            let i += 1
+            call add(choices, i.' '.alt)
+          endfor
+          let i = inputlist(choices)
+          if i > 0 && i <= len(projected)
+            let file = projected[i-1][0] . '!'
+          else
+            return ''
+          endif
         endif
       endif
     endif

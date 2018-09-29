@@ -50,6 +50,10 @@ applications.
   tableize coercions, and users of [bundler.vim][] get a smattering of
   features.   `:help rails-integration`
 
+* When using `:R`, if the related view doesn't exist, `json` and `slim` candidates
+  will be shown, and view file will be automatically created when selection
+  is made.
+
 ## Installation
 
 If you don't have a preferred installation method, I recommend
